@@ -1,0 +1,40 @@
+% Todo en mm, las unidades son muy similares a las de Rafael Fuente (mítico).
+f=250
+new_coord=lambda*fx*z;
+[x2,y2]=meshgrid(new_coord);
+tA=exp(-1j*k*(x2.^2+y2.^2)/(4*f))   % METER ALGÚN FACTOR PARA QUE FUNCIONE: Hemos multiplicado por 2 el denominador y todo parec salir bien.
+Initial_new_field=propfield.*tA;
+z1=250
+
+% Campo nada más salir
+figure(2)
+imagesc(new_coord,new_coord,abs(Initial_new_field))
+colormap('gray')
+colorbar
+
+%% Coordenadas nuevas. Sólo para calcular fx1 en las nuevas coordenadas.
+
+L1=2*max(new_coord) % la longitud es el doble porque se refiere a todo lo que ocupa el eje(sumando neg+pos)
+dx1=L1/N; % Length of one pixel
+x1=-L1/2:dx1:L1/2-dx1; % Coordinate vector (in meters)
+fx1=-1/(2*dx1):1/L1:1/(2*dx1)-1/L1;
+
+%% Propagamos otra ves:
+
+k=2*pi/(lambda); % Wavenumber
+
+Q=exp(1j*k*(x2.^2+y2.^2)/(2*z1)); % Quadratic phase factor
+
+propfield1=F(Initial_new_field.*Q)/(lambda*z1); % Calculate the propagated field
+propx1=fx1*lambda*z1; % Coordinate vector in the final plane
+
+%Plot the propagated field
+figure(3)
+imagesc(propx1,propx1,abs(propfield1))
+%imshow(propfield1)
+colormap('gray')
+xlabel('x(mm)')
+ylabel('y(mm)')
+title(['z = ' num2str(z) 'mm'])
+colorbar
+
