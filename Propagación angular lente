@@ -1,0 +1,32 @@
+% Tomamos el caso del sistema 2f con el foco a la mitad de z.
+f=z/2
+tA=exp(-1j*k*(X.^2+Y.^2)/(2*f))
+Initial_new_field=propfield.*tA;
+z1=z
+% Campo nada más salir
+figure(2)
+imagesc(x,x,abs(Initial_new_field))
+colormap('gray')
+colorbar
+
+%% Calculate propagated field
+
+
+F_Aperture=ifftshift(fft2(fftshift(Initial_new_field))); %Fourier transform (i.e. angular spectrum) of aperture. No se usa en realidad.
+
+H=exp(1i*z1*sqrt(k^2-(2*pi*FX).^2-(2*pi*FY).^2)); % Transfer function e^{i k_z z}
+
+propfield1=iF(F_Aperture.*H); % Calculate the propagated field
+
+I=abs(propfield1.^2)
+
+% Plot the propagated field
+figure(3)
+imagesc(x,x,abs(propfield1))
+colormap('gray')
+xlabel('x(\mum)')
+ylabel('y(\mum)')
+title(['z = ' num2str(z) '\mum'])
+colorbar
+axis image
+
