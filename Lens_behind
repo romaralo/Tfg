@@ -1,0 +1,56 @@
+%% Input parameters
+N=512; % Number of pixels
+L=10; % Length of the field of view (in meters)
+rad=1; % Radius of aperture (in meters)
+lambda=500e-6; % Wavelength of light (in meters)
+z=1000; %Propagation distance (in meters)
+%f=1500
+k=2*pi/(lambda); % Wavenumber
+w=1
+
+%% Coordinate vectors/grids
+dx=L/N; % Length of one pixel
+x=-L/2:dx:L/2-dx; % Coordinate vector (in meters)
+fx=-1/(2*dx):1/L:1/(2*dx)-1/L; % Spatial frequency vector (in 1/meters)
+
+[X,Y]=meshgrid(x,x); % Coordinate grids (real space)
+[FX,FY]=meshgrid(fx,fx); % Coordinate grids (Fourier space)
+
+%% Define aperture
+R=sqrt(X.^2+Y.^2); % Radial coordinate
+Aperture=double(R<rad); % Aperture
+
+A=imread('QWT.png'); %read image file 
+A= rgb2gray(A);
+A = imresize(A,[N N]);
+A=double(A)
+figure(4)
+imagesc(x,x,A)
+colormap('gray')
+
+%% Lens. Transf function.
+f=500
+tA=exp(-1j*k*(X.^2+Y.^2)/(2*f))
+
+%% Initial field. La lente justo detrás de la imagen, multiplicamos y es nuestro campo inicial.
+
+initial_field=A.*tA
+
+%% Calculate propagated field
+
+k=2*pi/lambda; % Wavenumber
+
+F_Aperture=ifftshift(fft2(fftshift(initial_field))); %Fourier transform (i.e. angular spectrum) of aperture. No se usa en realidad.
+
+H=exp(1i*z*sqrt(k^2-(2*pi*FX).^2-(2*pi*FY).^2)); % Transfer function e^{i k_z z}
+propfield=iF(F_Aperture.*H); % Calculate the propagated field
+
+%Plot the propagated field
+figure(1)
+imagesc(x,x,abs(propfield))
+colormap('gray')
+xlabel('x(mm)')
+ylabel('y(mm)')
+title(['z = ' num2str(z) 'mm'])
+colorbar
+axis image
